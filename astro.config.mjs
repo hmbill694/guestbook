@@ -14,4 +14,10 @@ export default defineConfig({
 	adapter: node({
 		mode: 'standalone',
 	}),
+
+	// TLS ends at the reverse proxy, so the server sees plain http. Trusting the
+	// proxy's X-Forwarded-Proto for this host lets the form POST origin check match.
+	security: {
+		allowedDomains: [{ hostname: 'guestbook.underhive.tech', protocol: 'https' }],
+	},
 });
