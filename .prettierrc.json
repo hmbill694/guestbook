@@ -1,0 +1,13 @@
+{
+  "useTabs": true,
+  "singleQuote": true,
+  "printWidth": 120,
+  "plugins": ["prettier-plugin-astro", "prettier-plugin-tailwindcss"],
+  "tailwindStylesheet": "./src/styles/global.css",
+  "overrides": [
+    {
+      "files": ["*.yml", "*.yaml", "*.md", "*.json"],
+      "options": { "useTabs": false }
+    }
+  ]
+}

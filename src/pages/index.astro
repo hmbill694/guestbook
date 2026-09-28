@@ -1,0 +1,87 @@
+---
+import { actions, isInputError } from 'astro:actions';
+import Layout from '../layouts/Layout.astro';
+import { listMessages } from '../lib/db';
+
+export const prerender = false;
+
+const result = Astro.getActionResult(actions.addMessage);
+if (result && !result.error) {
+	return Astro.redirect('/#messages');
+}
+
+const fieldErrors = isInputError(result?.error) ? result.error.fields : {};
+const messages = listMessages();
+---
+
+<Layout>
+	<section id="about" class="card bg-base-100 shadow">
+		<div class="card-body">
+			<h2 class="card-title">About Me</h2>
+		</div>
+	</section>
+
+	<section id="leave-a-message" class="card bg-base-100 shadow">
+		<form method="POST" action={actions.addMessage} class="card-body gap-4">
+			<h2 class="card-title">Leave a Message</h2>
+
+			{result?.error && !isInputError(result.error) && (
+				<div role="alert" class="alert alert-error">
+					Something went wrong. Please try again.
+				</div>
+			)}
+
+			<label class="floating-label">
+				<span>Name</span>
+				<input
+					type="text"
+					name="name"
+					placeholder="Name"
+					maxlength="100"
+					class:list={['input w-full', fieldErrors.name && 'input-error']}
+					required
+				/>
+			</label>
+			{fieldErrors.name && <p class="text-error text-sm">{fieldErrors.name.join(', ')}</p>}
+
+			<label class="floating-label">
+				<span>Message</span>
+				<textarea
+					name="message"
+					placeholder="Message"
+					maxlength="2000"
+					class:list={['textarea h-32 w-full', fieldErrors.message && 'textarea-error']}
+					required
+				></textarea>
+			</label>
+			{fieldErrors.message && <p class="text-error text-sm">{fieldErrors.message.join(', ')}</p>}
+
+			<div class="card-actions justify-end">
+				<button type="submit" class="btn btn-primary">
+					Sign the Guest Book
+				</button>
+			</div>
+		</form>
+	</section>
+
+	<section id="messages" class="space-y-4">
+		<h2 class="text-xl font-bold">Messages</h2>
+		{messages.length === 0 ? (
+			<p class="text-base-content/60">No messages yet. Be the first to sign!</p>
+		) : (
+			messages.map((m) => (
+				<article class="card bg-base-100 shadow-sm">
+					<div class="card-body">
+						<div class="flex items-baseline justify-between gap-4">
+							<h3 class="font-semibold">{m.name}</h3>
+							<time class="text-base-content/60 text-sm" datetime={`${m.created_at}Z`}>
+								{m.created_at} UTC
+							</time>
+						</div>
+						<p class="whitespace-pre-line">{m.message}</p>
+					</div>
+				</article>
+			))
+		)}
+	</section>
+</Layout>

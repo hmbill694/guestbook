@@ -1,0 +1,43 @@
+name: devenv update
+
+on:
+  schedule:
+    - cron: '0 5 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  update:
+    name: Update devenv inputs
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: cachix/install-nix-action@13d8dd58da0234aa297dedd986986ccb8e7f3e24 # v31.11.1
+      - uses: cachix/cachix-action@38b082610b782e7e93e209c35fd730d399dee866 # v17
+        with:
+          name: devenv
+      - name: Install devenv
+        run: nix profile add nixpkgs#devenv
+
+      - name: Update devenv inputs
+        run: devenv update
+
+      - name: Verify the environment still builds
+        run: devenv test
+
+      - uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
+        with:
+          token: ${{ secrets.RELEASE_TOKEN || github.token }}
+          branch: chore/devenv-update
+          title: 'chore(deps): update devenv inputs'
+          commit-message: 'chore(deps): update devenv inputs'
+          body: |
+            Automated `devenv update`. `devenv test` passed.
+          labels: dependencies
+          delete-branch: true

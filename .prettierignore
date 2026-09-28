@@ -1,0 +1,9 @@
+dist/
+.astro/
+data/
+.devenv/
+.direnv/
+package-lock.json
+devenv.lock
+CHANGELOG.md
+.release-please-manifest.json
